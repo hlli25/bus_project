@@ -14,8 +14,7 @@ import sqlalchemy as sa
 from app.models import User, Review
 from urllib.parse import urlsplit
 from app.chatbot import get_bot_response
-from flask import render_template
-from collections import Counter
+
 
 @app.route("/")
 def home():
@@ -46,57 +45,19 @@ def review():
 def chatbot():
     return render_template('chatbot.html', title="Home")
 
-# @app.route("/trend_report")
-# def trend_report():
-#     return render_template('trend_report.html', title="Home")
-
-chatbot_queries = []
-
 @app.route("/trend_report")
 def trend_report():
-    all_reviews = Review.query.all()
-
-    if all_reviews:
-        avg_score = sum(review.stars for review in all_reviews) / len(all_reviews)
-        total_ratings = len(all_reviews)
-    else:
-        avg_score = 0
-        total_ratings = 0
-    if chatbot_queries:
-        query_counter = Counter(chatbot_queries)
-        common_queries = [{'text': query, 'count': count}
-                          for query, count in query_counter.most_common(5)]
-    else:
-        common_queries = []
-
-    return render_template(
-        'trend_report.html',
-        title="Chatbot Trend Report",
-        avg_score=avg_score,
-        total_ratings=total_ratings,
-        common_queries=common_queries
-    )
-
-
-
-@app.route('/get', methods=['POST'])
-def get_response():
-    user_input = request.form['msg']
-
-    global chatbot_queries
-    chatbot_queries.append(user_input)
-    response = get_bot_response(user_input)
-    return jsonify({"reply": response})
+    return render_template('trend_report.html', title="Home")
 
 @app.route('/chat')
 def chat():
     return render_template('chat.html', title='UoB Chatbot')
 
-# @app.route('/get', methods=['POST'])
-# def get_response():
-#     user_input = request.form['msg']
-#     response = get_bot_response(user_input)
-#     return jsonify({"reply": response})
+@app.route('/get', methods=['POST'])
+def get_response():
+    user_input = request.form['msg']
+    response = get_bot_response(user_input)
+    return jsonify({"reply": response})
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
