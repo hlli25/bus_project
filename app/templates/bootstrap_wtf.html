@@ -14,10 +14,7 @@
     {%- endfor %}
   {%- elif field.type == 'SelectField' %}
     {{ field.label(class='form-label') }}
-    {{ field(class='form-select mb-3' + (' is-invalid' if field.errors else '')) }}
-    {%- for error in field.errors %}
-    <div class="invalid-feedback">{{ error }}</div>
-    {%- endfor %}
+    {{ field(class='form-select mb-3') }}
   {%- elif field.type == 'TextAreaField' %}
   <div class="mb-3">
     {{ field.label(class='form-label') }}

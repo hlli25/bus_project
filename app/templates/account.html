@@ -1,13 +1,38 @@
 {% extends "base.html" %}
-{% import "bootstrap_wtf.html" as wtf %}
+{% block title %}Account{% endblock %}
 
 {% block content %}
-<h1>Private Account Page</h1>
+<div class="container py-4">
+  <h2 class="mb-4">Account</h2>
 
-<p>Hello {{ current_user.username }}</p>
+  <p>Your current e-mail address is <b>{{ current_user.email }}</b>.</p>
+  <a href="{{ url_for('change_email') }}" class="btn btn-primary mb-2 w-100">
+    Change your e-mail address
+  </a>
 
-<p>This page is only available to you as the currently logged in user</p>
+  <a href="{{ url_for('reset_password') }}" class="btn btn-secondary mb-2 w-100">
+    Reset your password
+  </a>
 
-<p>The email address we have recorded for you is: {{ current_user.email }}</p>
+  <!-- Delete chat history -->
+  <button class="btn btn-danger w-100" data-bs-toggle="collapse"
+          data-bs-target="#confirmDelete" aria-expanded="false">
+    Delete your chat history
+  </button>
 
+  <div class="collapse mt-3" id="confirmDelete">
+    <div class="card card-body bg-dark text-white">
+      <p class="mb-2">Are you sure you want to permanently delete all your conversation history?</p>
+      <div class="d-flex gap-2">
+        <form action="{{ url_for('delete_history') }}" method="post" class="m-0">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn btn-danger me-2 w-auto">Yes</button>
+        </form>
+
+        <button class="btn btn-outline-light w-auto" data-bs-toggle="collapse"
+                data-bs-target="#confirmDelete">No</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

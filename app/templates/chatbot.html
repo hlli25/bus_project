@@ -33,20 +33,19 @@
       tasklists: true
     });
 
-    const fixedReplies = {
-      "How can I clear all conversation history?":
-        "You can delete all conversation history on the 'My Account' page.",
-      "Can I make an appointment for counselling?":
-        "Sure! Please follow the procedures to book your counselling session:"
-    };
+
 
     let awaitingHumanConfirmation = false;
 
     function fetchBotReply(msg) {
       const chatBox = document.getElementById('chat-box');
+      const token = document.querySelector('meta[name="csrf-token"]').content;
       return fetch('/get', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': token
+        },
         body: `msg=${encodeURIComponent(msg)}`
       })
       .then(response => response.json())
@@ -75,14 +74,6 @@
       // handle yes/no for human request
       if (awaitingHumanConfirmation) {
         handleHumanConfirmation(msg.toLowerCase());
-        inputEl.value = '';
-        return;
-      }
-
-      // fixed FAQ replies
-      if (fixedReplies[msg]) {
-        chatBox.innerHTML += `<div class="msg-bubble bot-msg">${fixedReplies[msg]}</div>`;
-        scrollDown();
         inputEl.value = '';
         return;
       }
@@ -151,7 +142,12 @@
 
     function sendFAQ(question) {
       awaitingHumanConfirmation = false;
-      document.getElementById('user-input').value = question;
+
+      const chatBox = document.getElementById('chat-box');
+      scrollDown();
+
+      const inputEl = document.getElementById('user-input');
+      inputEl.value = question;
       sendMessage();
     }
 
@@ -179,7 +175,7 @@
       const rc = document.getElementById('feedback-container');
       if (choice === 'yes') {
         // redirect to feedback page
-        window.location.href = "{{ url_for('feedback') }}";
+        window.location.href = "{{ url_for('review') }}";
       } else {
         rc.innerHTML = `
           <div class="alert alert-secondary">

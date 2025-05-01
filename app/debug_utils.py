@@ -8,11 +8,12 @@ def reset_db():
     db.create_all()
 
     users =[
-        {'username': 'admin1', 'email': 'admin1@uniss.com', 'role': 'Admin', 'pw': 'admin1.pw'},
-        {'username': 'admin2', 'email': 'admin2@uniss.com', 'role': 'Admin', 'pw': 'admin2.pw'},
-        {'username': 'user1',  'email': 'user1@uniss.com',                   'pw': 'user1.pw'},
-        {'username': 'user2',  'email': 'user2@uniss.com',                   'pw': 'user2.pw'},
-        {'username': 'user3',  'email': 'user3@uniss.com',                   'pw': 'user3.pw'}
+        {'username': 'admin1',      'email': 'admin1@uniss.com',   'role': 'Admin',      'pw': 'admin1.pw'},
+        {'username': 'admin2',      'email': 'admin2@uniss.com',   'role': 'Admin',      'pw': 'admin2.pw'},
+        {'username': 'student1',    'email': 'student1@uniss.com', 'role': 'Student',    'pw': 'student1.pw'},
+        {'username': 'student2',    'email': 'student2@uniss.com', 'role': 'Student',    'pw': 'student2.pw'},
+        {'username': 'counsellor1', 'email': 'counsel1@uniss.com', 'role': 'Counsellor', 'pw': 'counsel1.pw'},
+        {'username': 'counsellor2', 'email': 'counsel2@uniss.com', 'role': 'Counsellor', 'pw': 'counsel2.pw'}
     ]
 
     for u in users:
@@ -26,7 +27,7 @@ def reset_db():
         db.session.add(user)
     db.session.commit()
 
-# if __name__ == '__main__':
-#     from app import app
-#     with app.app_context():
-#         reset_db()
+if __name__ == '__main__':
+    from app import app
+    with app.app_context():
+        reset_db()
