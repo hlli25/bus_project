@@ -4,7 +4,7 @@
 {% block content %}
 <h1>Review</h1>
 
-<h2 class="mt-5">Add Review</h2>
+<h2 class="mt-5">{{ 'Add New' if form.edit.data == '-1' else 'Edit' }} Review</h2>
 <div class="container row justify-content-start col-6">
     <form method="POST" action="{{ url_for('review') }}" novalidate>
         {{ form.hidden_tag() }}
@@ -12,6 +12,11 @@
         {{ wtf.form_field(form.stars, False) }}
         {{ wtf.form_field(form.text, False) }}
         {{ wtf.form_field(form.submit, False) }}
+        {% if form.edit.data != '-1' %}
+        <div>
+            <a href="{{ url_for('review') }}" class="btn btn-secondary">Cancel Edit</a>
+        </div>
+        {% endif %}
     </form>
 </div>
 
