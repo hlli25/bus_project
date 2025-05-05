@@ -33,8 +33,6 @@
       tasklists: true
     });
 
-
-
     let awaitingHumanConfirmation = false;
 
     function fetchBotReply(msg) {
@@ -96,15 +94,41 @@
 
     function handleHumanConfirmation(response) {
       const chatBox = document.getElementById('chat-box');
+      const token = document.querySelector('meta[name="csrf-token"]').content;
       if (response === 'yes' || response === 'y') {
-        chatBox.innerHTML += `
-          <div class="msg-bubble bot-msg">
-            Thank you. A human agent will contact you shortly. Please check your email.<br>
-            Conversation Ended
-          </div>`;
-        endConversationControls();
-        // then ask for feedback
-        askForFeedback();
+
+        // tell the server to create the ticket
+        fetch('/chatbot/create_ticket', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': token
+          }
+        })
+        .then(res => {
+          if (!res.ok) throw new Error('Network response was not ok');
+          return res.json();
+        })
+        .then(data => {
+          // Show confirmation + ticket info
+          chatBox.innerHTML += `
+            <div class="msg-bubble bot-msg">
+                Thank you. A human agent will contact you shortly. Please check your email.
+                <br><strong>Ticket #${data.ticket_id}</strong> has been created.<br>
+                Conversation Ended
+            </div>`;
+          endConversationControls();
+
+          // then ask for feedback
+          askForFeedback();
+        })
+        .catch(err => {
+          console.error('Ticket creation failed', err);
+          chatBox.innerHTML += `
+            <div class="msg-bubble bot-msg">
+                There was a problem creating your support ticket. Please try again.
+            </div>`;
+        });
       } else if (response === 'no' || response === 'n') {
         chatBox.innerHTML += `
           <div class="msg-bubble bot-msg">

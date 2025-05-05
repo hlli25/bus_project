@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, request, jsonify, session
+from flask import render_template, redirect, url_for, flash, request, jsonify, session, abort
 from app import app
 from app.forms import ChooseForm, LoginForm, RegisterForm, ReviewForm, ChangeEmailForm, ResetPasswordForm
 from werkzeug.security import generate_password_hash
@@ -6,14 +6,16 @@ import os
 import csv
 import io
 from uuid import uuid4
-from flask_login import current_user, login_user, logout_user, login_required, fresh_login_required
+from flask_login import current_user, login_user, logout_user, login_required
 from app import db
 import sqlalchemy as sa
-from app.models import User, Review, Conversation, Message
+from app.models import User, Review, Conversation, Student, Resource, Ticket
 from urllib.parse import urlsplit
-from app.chatbot import get_bot_response, chat_and_log
+from app.chatbot import chat_and_log
 from collections import Counter
 from datetime import datetime
+from app.entities import AIChatbot
+from app.services.student import request_resource, view_well_being_progress, respond_to_ticket
 
 
 @app.route("/")
@@ -63,6 +65,16 @@ def chatbot():
     session["conversation_id"] = conv.id
     return render_template('chatbot.html', title="UoB Chatbot", initial_greeting=initial_greeting)
 
+@app.route("/chatbot/create_ticket", methods=['POST'])
+@login_required
+def create_ticket_route():
+    bot = AIChatbot()
+    ticket = bot.create_ticket(current_user)
+    return jsonify({
+        'ticket_id': ticket.ticket_id,
+        'status': ticket.status
+    })
+
 
 chatbot_queries = []
 
@@ -101,7 +113,8 @@ def get_response():
     global chatbot_queries
     chatbot_queries.append(user_input)
 
-    response = chat_and_log(user_input)
+    bot = AIChatbot()
+    response = bot.chat(user_input)
     return jsonify({"reply": response})
 
 
@@ -191,12 +204,57 @@ def delete_history():
 @app.route('/booking')
 @login_required
 def booking():
-    return render_template("booking.html", title="Booking")
+    """
+        Implement CounsellingSession() in entities.py
+        If current_user.role == 'Counsellor', include accessing manage_counselling_session() in counsellor.py
+    """
+    return render_template("booking.html", title="Your Counselling Sessions")
 
 
 @app.route('/fqa')
 def faq():
     return render_template("faq.html", title="FAQ")
+
+
+@app.route("/student/resources")
+@login_required
+def student_resources():
+    if not isinstance(current_user, Student):
+        abort(403)
+    resources = Resource.query.order_by(Resource.title).all()
+    return render_template("student/resources.html", title="Available Resources", resources=resources)
+
+@app.route('/student/resource/<int:resource_id>')
+@login_required
+def student_request_resource(resource_id):
+    if not isinstance(current_user, Student):
+        abort(403)
+    resource = request_resource(current_user, resource_id)
+    return render_template('student/resource.html', title=f"Resource - {resource.title}", resource=resource)
+
+@app.route('/student/wellbeing')
+@login_required
+def student_wellbeing():
+    if not isinstance(current_user, Student):
+        abort(403)
+    progress = view_well_being_progress(current_user)
+    return render_template('student/wellbeing.html', title="Well‑being Progress", progress=progress)
+
+@app.route("/student/tickets")
+@login_required
+def student_tickets():
+    if not isinstance(current_user, Student):
+        abort(403)
+    tickets = Ticket.query.order_by(Ticket.id).all()
+    return render_template("student/tickets.html", title="Tickets", tickets=tickets)
+
+@app.route('/student/ticket/<int:ticket_id>/respond', methods=['POST'])
+@login_required
+def student_respond_ticket(ticket_id):
+    if not isinstance(current_user, Student):
+        abort(403)
+    ticket = respond_to_ticket(current_user, ticket_id)
+    return render_template('student/ticket.html', title=f"Ticket #{ticket_id}", ticket=ticket)
 
 
 # Error handler for 403 Forbidden

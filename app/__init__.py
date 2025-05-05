@@ -24,3 +24,7 @@ from app.debug_utils import reset_db
 @app.shell_context_processor
 def make_shell_context():
     return dict(db=db, sa=sa, so=so, reset_db=reset_db)
+
+@app.template_filter('datetimeformat')
+def datetimeformat(value, fmt="%Y‑%m‑%d %H:%M"):
+    return value.strftime(fmt)

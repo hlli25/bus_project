@@ -59,8 +59,10 @@
                 {% if not current_user.is_anonymous %}
                 <li class="nav-item"><a class="nav-link" href="{{ url_for('review') }}">Review</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ url_for('chatbot') }}">Chatbot</a></li>
-                    {% if not current_user.role=="Student" %}
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('trend_report') }}">Trend Report</a></li>
+                    {% if current_user.role=="Student" %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('student_resources') }}">Resources</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('trend_report') }}">Trend Report</a></li>
                     {% endif %}
                 {% endif %}
             </ul>

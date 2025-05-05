@@ -1,5 +1,5 @@
 from app import db
-from app.models import User, Review
+from app.models import User, Review, Admin, Student, Counsellor
 import datetime
 
 
@@ -8,22 +8,21 @@ def reset_db():
     db.create_all()
 
     users =[
-        {'username': 'admin1',      'email': 'admin1@uniss.com',   'role': 'Admin',      'pw': 'admin1.pw'},
-        {'username': 'admin2',      'email': 'admin2@uniss.com',   'role': 'Admin',      'pw': 'admin2.pw'},
-        {'username': 'student1',    'email': 'student1@uniss.com', 'role': 'Student',    'pw': 'student1.pw'},
-        {'username': 'student2',    'email': 'student2@uniss.com', 'role': 'Student',    'pw': 'student2.pw'},
-        {'username': 'counsellor1', 'email': 'counsel1@uniss.com', 'role': 'Counsellor', 'pw': 'counsel1.pw'},
-        {'username': 'counsellor2', 'email': 'counsel2@uniss.com', 'role': 'Counsellor', 'pw': 'counsel2.pw'}
+        {'cls': Admin,      'username': 'admin1',      'email': 'admin1@uniss.com',   'role': 'Admin',      'pw': 'admin1.pw', 'admin_level': 1},
+        {'cls': Admin,      'username': 'admin2',      'email': 'admin2@uniss.com',   'role': 'Admin',      'pw': 'admin2.pw', 'admin_level': 2},
+        {'cls': Student,    'username': 'student1',    'email': 'student1@uniss.com', 'role': 'Student',    'pw': 'student1.pw'},
+        {'cls': Student,    'username': 'student2',    'email': 'student2@uniss.com', 'role': 'Student',    'pw': 'student2.pw'},
+        {'cls': Counsellor, 'username': 'counsellor1', 'email': 'counsel1@uniss.com', 'role': 'Counsellor', 'pw': 'counsel1.pw', 'specialisation': 'General'},
+        {'cls': Counsellor, 'username': 'counsellor2', 'email': 'counsel2@uniss.com', 'role': 'Counsellor', 'pw': 'counsel2.pw', 'specialisation': 'Academic'},
     ]
 
     for u in users:
-        # get the password value and remove it from the dict:
         pw = u.pop('pw')
-        # create a new user object using the parameters defined by the remaining entries in the dict:
-        user = User(**u)
-        # set the password for the user object:
+        model_cls = u.pop('cls')
+
+        user = model_cls(**u)
         user.set_password(pw)
-        # add the newly created user object to the database session:
+
         db.session.add(user)
 
 
@@ -51,7 +50,7 @@ def reset_db():
 
     db.session.commit()
 
-# if __name__ == '__main__':
-#     from app import app
-#     with app.app_context():
-#         reset_db()
+if __name__ == '__main__':
+    from app import app
+    with app.app_context():
+        reset_db()

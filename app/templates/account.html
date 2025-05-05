@@ -14,6 +14,16 @@
     Reset your password
   </a>
 
+  {% if current_user.role=="Student" %}
+  <a href="{{ url_for('student_wellbeing') }}" class="btn btn-secondary mb-2 w-100">
+    View your well-being progress
+  </a>
+  {% endif %}
+
+    <a href="{{ url_for('student_tickets') }}" class="btn btn-secondary mb-2 w-100">
+    Your Tickets
+  </a>
+
   <!-- Delete chat history -->
   <button class="btn btn-danger w-100" data-bs-toggle="collapse"
           data-bs-target="#confirmDelete" aria-expanded="false">
