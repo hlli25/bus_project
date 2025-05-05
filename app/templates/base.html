@@ -69,6 +69,7 @@
                 <li class="nav-item"><a class="nav-link" aria-current="page" href="{{ url_for('login') }}">Login</a></li>
                 <li class="nav-item"><a class="nav-link" aria-current="page" href="{{ url_for('register') }}">Register</a></li>
                 {% else %}
+                <li class="nav-item"><a class="nav-link" aria-current="page" href="{{ url_for('booking') }}">Booking</a></li>
                 <li class="nav-item"><a class="nav-link" aria-current="page" href="{{ url_for('account') }}">Account</a></li>
                 <li class="nav-item"><a class="nav-link" aria-current="page" href="{{ url_for('logout') }}">Logout {{ current_user.username }}</a></li>
                 {% endif %}

@@ -25,6 +25,12 @@ def get_bot_response(user_input):
 
     if user_message_lower in FAQ_RESPONSES:
         return FAQ_RESPONSES[user_message_lower]
+
+    elif "faq" in user_message_lower:
+        return f"You can find the faq section here: {url_for('faq', _external=True)}"
+    elif "support" in user_message_lower:
+        return "If you need support, please contact us at support@uniss.com."
+
     elif "review" in user_message_lower:
         return f"You can leave a review here: {url_for('review', _external=True)}"
     elif "report" in user_message_lower:

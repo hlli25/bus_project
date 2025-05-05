@@ -12,6 +12,8 @@ import sqlalchemy as sa
 from app.models import User, Review, Conversation, Message
 from urllib.parse import urlsplit
 from app.chatbot import get_bot_response, chat_and_log
+from collections import Counter
+from datetime import datetime
 
 
 @app.route("/")
@@ -40,26 +42,68 @@ def review():
         return render_template('review.html', title="Home", form=review_form)
     return render_template('review.html', title="Home", form=review_form)
 
+
+def get_greeting_message():
+    now = datetime.now()
+    current_hour = now.hour
+    if current_hour < 12:
+        time_greeting = "Good morning"
+    elif 12 <= current_hour < 18:
+        time_greeting = "Good afternoon"
+    else:
+        time_greeting = "Good evening"
+    return f"{time_greeting}, {current_user.username}! How can I help you today?"
 @app.route("/chatbot")
 @login_required
 def chatbot():
+    initial_greeting = get_greeting_message()
     conv = Conversation(user_id=current_user.id)
     db.session.add(conv)
     db.session.commit()
     session["conversation_id"] = conv.id
-    return render_template('chatbot.html', title="UoB Chatbot")
+    return render_template('chatbot.html', title="UoB Chatbot", initial_greeting=initial_greeting)
+
+
+chatbot_queries = []
 
 @app.route("/trend_report")
 @login_required
 def trend_report():
-    return render_template('trend_report.html', title="Home")
+    all_reviews = Review.query.all()
+
+    if all_reviews:
+        avg_score = sum(review.stars for review in all_reviews) / len(all_reviews)
+        total_ratings = len(all_reviews)
+    else:
+        avg_score = 0
+        total_ratings = 0
+    if chatbot_queries:
+        query_counter = Counter(chatbot_queries)
+        common_queries = [{'text': query, 'count': count}
+                          for query, count in query_counter.most_common(5)]
+    else:
+        common_queries = []
+
+    return render_template(
+        'trend_report.html',
+        title="Chatbot Trend Report",
+        avg_score=avg_score,
+        total_ratings=total_ratings,
+        common_queries=common_queries
+    )
+
 
 @app.route('/get', methods=['POST'])
 @login_required
 def get_response():
     user_input = request.form['msg']
+
+    global chatbot_queries
+    chatbot_queries.append(user_input)
+
     response = chat_and_log(user_input)
     return jsonify({"reply": response})
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -93,15 +137,18 @@ def register():
         return redirect(url_for('home'))
     return render_template('generic_form.html', title='Register', form=form)
 
+
 @app.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('home'))
 
+
 @app.route('/account')
 @login_required
 def account():
     return render_template("account.html", title="Account")
+
 
 @app.route("/account/email", methods=["GET", "POST"])
 @login_required
@@ -114,6 +161,7 @@ def change_email():
         return redirect(url_for("account"))
     return render_template("generic_form.html", title='Change Email', form=form)
 
+
 @app.route("/account/password", methods=["GET", "POST"])
 @login_required
 def reset_password():
@@ -124,6 +172,7 @@ def reset_password():
         flash("Password changed successfully. Please log in again.", "success")
         return redirect(url_for("logout"))
     return render_template("generic_form.html", title='Reset Password', form=form)
+
 
 @app.route("/account/delete_history", methods=["POST"])
 @login_required
@@ -137,6 +186,17 @@ def delete_history():
 
     flash("Your entire chat history has been deleted.", "info")
     return redirect(url_for("account"))
+
+
+@app.route('/booking')
+@login_required
+def booking():
+    return render_template("booking.html", title="Booking")
+
+
+@app.route('/fqa')
+def faq():
+    return render_template("faq.html", title="FAQ")
 
 
 # Error handler for 403 Forbidden
