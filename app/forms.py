@@ -43,7 +43,7 @@ class ReviewForm(FlaskForm):
     edit = HiddenField(default='')
     feature = SelectField(choices=[('Chatbot','Chatbot'),('Trend Report','Trend Report'),('Review System','Review System'),
                                    ('General','General')])
-    stars = SelectField(choices=[(-1,''),(0,'0'),(1,'1'),(2,'2'),(3,'3'),(4,'4'),(5,'5')], default=-1,
+    stars = SelectField(choices=[(-1,'Select rating'),(0,'0'),(1,'1'),(2,'2'),(3,'3'),(4,'4'),(5,'5')], default=-1,
                         validators=[DataRequired()])
     text = TextAreaField('Review Text', validators=[Optional(), Length(max=1024)] )
     submit = SubmitField('Add Review')

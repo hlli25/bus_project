@@ -2,27 +2,16 @@
 {% import "bootstrap_wtf.html" as wtf %}
 
 {% block content %}
-<h1>Review</h1>
+<h1>Manage Reviews</h1>
 
-<h2 class="mt-5">Add Review</h2>
-<div class="container row justify-content-start col-6">
-    <form method="POST" action="{{ url_for('review') }}" novalidate>
-        {{ form.hidden_tag() }}
-        {{ wtf.form_field(form.feature, False) }}
-        {{ wtf.form_field(form.stars, False) }}
-        {{ wtf.form_field(form.text, False) }}
-        {{ wtf.form_field(form.submit, False) }}
-        <div>
-            <a href="{{ url_for('review') }}" class="btn btn-secondary">Cancel Edit</a>
-        </div>
-        {% endif %}
-    </form>
-</div>
 
 <h2 class="mt-5">Your Reviews</h2>
 <table class="table table-dark table-striped table-bordered align-middle shadow-sm rounded">
     <thead class="table-secondary text-dark shadow-sm rounded">
         <tr>
+            <th>
+                Username
+            </th>
             <th>
                 Feature
             </th>
@@ -34,8 +23,11 @@
             </th>
         </tr>
     </thead>
-    {% for review in current_user.reviews %}
+    {% for review in reviews %}
         <tr>
+            <td>
+                {{ review.user.username }}
+            </td>
             <td>
                 {{ review.feature }}
             </td>
@@ -44,6 +36,13 @@
             </td>
             <td>
                 {{ '' if review.text == None else review.text }}
+            </td>
+            <td>
+                <form action="{{ url_for('delete_review') }}" method="post">
+                    {{ choose_form.csrf_token }}
+                    {{ choose_form.choice(value=review.id) }}
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
             </td>
         </tr>
     {% endfor %}

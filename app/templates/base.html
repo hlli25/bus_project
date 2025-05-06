@@ -64,6 +64,12 @@
                     {% else %}
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('trend_report') }}">Trend Report</a></li>
                     {% endif %}
+                    {% if current_user.role=="Admin" %}
+                        <li
+                                class="nav-item"><a class="nav-link" href="{{ url_for('manage_reviews') }}">Manage
+                            Reviews
+                        </a></li>
+                    {% endif %}
                 {% endif %}
             </ul>
             <ul class="navbar-nav mb-2 mb-lg-0">

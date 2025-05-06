@@ -6,7 +6,7 @@ import os
 import csv
 import io
 from uuid import uuid4
-from flask_login import current_user, login_user, logout_user, login_required
+from flask_login import current_user, login_user, logout_user
 from app import db
 import sqlalchemy as sa
 from app.models import User, Review, Conversation, Student, Resource, Ticket
@@ -16,6 +16,7 @@ from collections import Counter
 from datetime import datetime
 from app.entities import AIChatbot
 from app.services.student import request_resource, view_well_being_progress, respond_to_ticket
+from app.decorators import login_required, admin_required
 
 
 @app.route("/")
@@ -45,6 +46,25 @@ def review():
     return render_template('review.html', title="Home", form=review_form)
 
 
+@app.route("/manage_reviews", methods=['GET'])
+@admin_required
+def manage_reviews():
+    reviews = db.session.execute(db.select(Review)).scalars().all()
+    choose_form = ChooseForm()
+    return render_template('manage_reviews.html', title="Manage Reviews", reviews=reviews, choose_form=choose_form)
+
+@app.route("/delete_review", methods=['POST'])
+def delete_review():
+    choose_form = ChooseForm()
+    if choose_form.validate_on_submit():
+        review_id = choose_form.choice.data  # Extract ID from form
+        review = db.session.get(Review, review_id)
+        if review:
+            db.session.delete(review)
+            db.session.commit()
+    return redirect(url_for('manage_reviews'))
+
+
 def get_greeting_message():
     now = datetime.now()
     current_hour = now.hour
@@ -55,6 +75,7 @@ def get_greeting_message():
     else:
         time_greeting = "Good evening"
     return f"{time_greeting}, {current_user.username}! How can I help you today?"
+
 @app.route("/chatbot")
 @login_required
 def chatbot():
@@ -211,7 +232,7 @@ def booking():
     return render_template("booking.html", title="Your Counselling Sessions")
 
 
-@app.route('/fqa')
+@app.route('/faq')
 def faq():
     return render_template("faq.html", title="FAQ")
 
