@@ -10,6 +10,7 @@ from app import db, login
 from dataclasses import dataclass
 from datetime import datetime
 
+# User class
 @dataclass
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -28,6 +29,7 @@ class User(UserMixin, db.Model):
     # when user deleted, reviews remain with null user
     reviews: so.Mapped[list['Review']] = relationship(back_populates='user', cascade='save-update, merge')
 
+    # when user deleted, conversations and messages also deleted
     conversations: so.Mapped[list['Conversation']] = relationship(back_populates='user', cascade='all, delete-orphan')
     messages: so.Mapped[list['Message']] = relationship(back_populates='sender', cascade='all, delete-orphan')
 
@@ -41,6 +43,7 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+# Admin, Student and Counsellor classes inherit from User
 class Admin(User):
     __tablename__ = 'admins'
     id: so.Mapped[int] = so.mapped_column(ForeignKey('users.id'), primary_key=True)
@@ -83,7 +86,7 @@ class Review(db.Model):
         return f'Review(stars={self.stars}, text="{self.text}", user_id={self.user_id})'
 
 
-# User 1-n Conversation 1-n Message
+# User 1-n Conversations
 class Conversation(db.Model):
     __tablename__ = "conversations"
     id: so.Mapped[int] = so.mapped_column(primary_key=True)
@@ -92,6 +95,7 @@ class Conversation(db.Model):
     user: so.Mapped["User"] = relationship(back_populates="conversations")
     messages: so.Mapped[list["Message"]] = relationship(back_populates="conversation", cascade="all, delete-orphan")
 
+# User and Conversation have 1-n association with Message
 class Message(db.Model):
     __tablename__ = "messages"
     id: so.Mapped[int] = so.mapped_column(primary_key=True)

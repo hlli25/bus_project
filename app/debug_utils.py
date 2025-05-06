@@ -2,7 +2,7 @@ from app import db
 from app.models import User, Review, Admin, Student, Counsellor
 import datetime
 
-
+# use this reset function in a flask shell via the terminal to reset the SQL database with the following dummy data
 def reset_db():
     db.drop_all()
     db.create_all()

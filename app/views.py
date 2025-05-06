@@ -2,22 +2,16 @@ from flask import render_template, redirect, url_for, flash, request, jsonify, s
 from app import app
 from app.forms import ChooseForm, LoginForm, RegisterForm, ReviewForm, ChangeEmailForm, ResetPasswordForm
 from werkzeug.security import generate_password_hash
-import os
-import csv
-import io
-from uuid import uuid4
 from flask_login import current_user, login_user, logout_user
 from app import db
 import sqlalchemy as sa
 from app.models import User, Review, Conversation, Student, Resource, Ticket
 from urllib.parse import urlsplit
-from app.chatbot import chat_and_log
 from collections import Counter
 from datetime import datetime
 from app.entities import AIChatbot
 from app.services.student import request_resource, view_well_being_progress, respond_to_ticket
-from app.decorators import login_required, admin_required
-
+from app.decorators import login_required, admin_required, student_required
 
 @app.route("/")
 def home():
@@ -53,6 +47,7 @@ def manage_reviews():
     choose_form = ChooseForm()
     return render_template('manage_reviews.html', title="Manage Reviews", reviews=reviews, choose_form=choose_form)
 
+# used by delete button in template: "manage_reviews.html"
 @app.route("/delete_review", methods=['POST'])
 def delete_review():
     choose_form = ChooseForm()
@@ -237,43 +232,35 @@ def faq():
     return render_template("faq.html", title="FAQ")
 
 
+# student resources, only accessible if user role == Student
+
 @app.route("/student/resources")
-@login_required
+@student_required
 def student_resources():
-    if not isinstance(current_user, Student):
-        abort(403)
     resources = Resource.query.order_by(Resource.title).all()
     return render_template("student/resources.html", title="Available Resources", resources=resources)
 
 @app.route('/student/resource/<int:resource_id>')
-@login_required
+@student_required
 def student_request_resource(resource_id):
-    if not isinstance(current_user, Student):
-        abort(403)
     resource = request_resource(current_user, resource_id)
     return render_template('student/resource.html', title=f"Resource - {resource.title}", resource=resource)
 
 @app.route('/student/wellbeing')
-@login_required
+@student_required
 def student_wellbeing():
-    if not isinstance(current_user, Student):
-        abort(403)
     progress = view_well_being_progress(current_user)
     return render_template('student/wellbeing.html', title="Well‑being Progress", progress=progress)
 
 @app.route("/student/tickets")
-@login_required
+@student_required
 def student_tickets():
-    if not isinstance(current_user, Student):
-        abort(403)
     tickets = Ticket.query.order_by(Ticket.id).all()
     return render_template("student/tickets.html", title="Tickets", tickets=tickets)
 
 @app.route('/student/ticket/<int:ticket_id>/respond', methods=['POST'])
-@login_required
+@student_required
 def student_respond_ticket(ticket_id):
-    if not isinstance(current_user, Student):
-        abort(403)
     ticket = respond_to_ticket(current_user, ticket_id)
     return render_template('student/ticket.html', title=f"Ticket #{ticket_id}", ticket=ticket)
 

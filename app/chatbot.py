@@ -20,12 +20,16 @@ FAQ_RESPONSES: dict[str,str] = {
        "Sure. A human agent will contact you shortly."
 }
 
+
+
 def get_bot_response(user_input):
     user_message_lower = user_input.lower()
 
+    # checks if user has clicked on one of the default questions, and answers accordingly
     if user_message_lower in FAQ_RESPONSES:
         return FAQ_RESPONSES[user_message_lower]
 
+    # elif statements allow for custom messages depending on user input
     elif "faq" in user_message_lower:
         return f"You can find the faq section here: {url_for('faq', _external=True)}"
     elif "resource" in user_message_lower:
