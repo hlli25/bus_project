@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+  <h2 class="mb-3">Ticket #{{ ticket.ticket_id }}</h2>
+
+  <span class="badge bg-{{ 'success' if ticket.status == 'closed' else 'warning' }}">
+    {{ ticket.status|capitalize }}
+  </span>
+
+  <h4 class="mt-4">Conversation</h4>
+  {% if ticket.messages %}
+    <ul class="list-group">
+      {% for msg in ticket.messages %}
+        <li class="list-group-item">{{ msg }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-muted">No messages yet.</p>
+  {% endif %}
+
+  {% if ticket.status != 'closed' %}
+  <form class="mt-4" method="post" action="{{ url_for('student_respond_ticket', ticket_id=ticket.ticket_id) }}">
+    <div class="input-group">
+      <input class="form-control" name="message" placeholder="Type your reply …" required>
+      <button class="btn btn-primary">Send</button>
+    </div>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

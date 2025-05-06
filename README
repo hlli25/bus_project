@@ -1,0 +1,79 @@
+*System description*
+
+This system is intended to support students of the University of Birmingham with their wellbeing.
+It includes a chatbot, trend report, and review feature which will be summarised further down.
+It is intended to be used by three main user types: Student, Admin, Counsellor; each of whom have varying access to the
+different functionalities.
+
+
+*How to run the project*
+
+The test data is already within the SQL database. If for any reason it does not work, repopulate the database by
+running the reset_db() function in a flask shell via the terminal.
+
+Obtain a Google Gemini API key from: https://aistudio.google.com/apikey and add it to the ".env" file
+
+Set up a run configuration with module: 'flask'.
+Ensure the python environment used has the appropriate libraries installed. the main libraries which may need to be
+installed are:
+
+google-genai
+flask
+flask-login
+flask-sqlalchemy
+flask-wtf
+
+Once the web app has been opened, please login using the login details below (also listed in the home page of the app):
+
+Admin login - username: admin1, password: admin1.pw
+Counsellor login - username: counsellor1, password: counsel1.pw
+Student login - username: student1, password: student1.pw
+
+
+*List of programming languages, frameworks, tools*
+
+Python - the main programming language used to create this project
+Flask - web application framework used to handle sessions, user authentication and integrate with WTforms
+Bootstrap - front-end CSS framework used to create aesthetically pleasing UI features
+SQLAlchemy - an Object Relational Mapper used to interact with the SQL database using Python classes
+Google Gemini API - used to integrate Google's generative AI model into the app
+
+
+*Summary of implemented functionalities*
+
+Login / Register - simple login and register features which utilise the User SQLAlchemy model, which has attributes id,
+username, password, role. Access to certain pages, and the contents of the navbar are dependent on if a user is logged
+in, and what their role is.
+
+Chatbot - integrated with Google Gemini API. Provides a signposting service to different parts of the web app due to the
+ customised responses provided in "chatbot.py". Future functionality would include direct booking functionality through
+ the chatbot, and direct completion of the CORE34 form through the chatbot
+
+Trend report - analyses data produced from the Review SQLAlchemy model and Conversation SQLAlchemy model to summarise
+ user engagement and feedback of the app. Future functionality will include more detailed analysis, splitting feedback
+ by feature, and producing graphs based on user-inputted parameters.
+
+Reviews - allows users to provide reviews for each functionality, both via a 1-5 star rating, and an optional text
+review. Admins can view all reviews in a centralised "Manage reviews" page, as well as delete any reviews which may be
+inappropriate or malicious. If a User is deleted, their reviews still stay due to the cascade option used in "models.py"
+, ensuring that feedback is not lost.
+
+
+*Contributions*
+
+Tanveer Haider - 2181796 (35%): Web app template (base, home, placeholder pages), login/register function,
+adding/managing reviews, decorators, User and Review models, adding in parameters to Chatbot to give customised
+responses, README file
+
+James Jackson - 2839180 (10%): updates to trend report feature
+
+Carrick Kennedy - 2837588 (10%): initial trend report feature
+
+Ho Lam Li - 2879279 (35%): developing Chatbot UI feature, adding in Models for Conversation, Message, Resource,
+CounsellingSession, Ticket, destination pages for Chatbot signposting such as "Resources"
+
+Jalal Zulfiqar - 2724243 (10%): initial Chatbot UI development
+
+
+
+

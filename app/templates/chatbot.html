@@ -3,7 +3,7 @@
 
   <h2 class="text-center mb-4">Chatbot</h2>
   <div class="chat-box mb-3 d-flex flex-column chat-container" id="chat-box">
-    <div class="msg-bubble bot-msg mb-2">Hi there! How can I help you today?</div>
+    <div class="msg-bubble bot-msg mb-2">{{ initial_greeting }}</div>
 <div class="d-flex flex-wrap gap-2 mb-3">
   <button class="btn btn-outline-primary btn-sm rounded-pill" onclick="sendFAQ('How can I clear all conversation history?')">
     How can I clear all conversation history?
@@ -33,20 +33,17 @@
       tasklists: true
     });
 
-    const fixedReplies = {
-      "How can I clear all conversation history?":
-        "You can delete all conversation history on the 'My Account' page.",
-      "Can I make an appointment for counselling?":
-        "Sure! Please follow the procedures to book your counselling session:"
-    };
-
     let awaitingHumanConfirmation = false;
 
     function fetchBotReply(msg) {
       const chatBox = document.getElementById('chat-box');
+      const token = document.querySelector('meta[name="csrf-token"]').content;
       return fetch('/get', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': token
+        },
         body: `msg=${encodeURIComponent(msg)}`
       })
       .then(response => response.json())
@@ -79,14 +76,6 @@
         return;
       }
 
-      // fixed FAQ replies
-      if (fixedReplies[msg]) {
-        chatBox.innerHTML += `<div class="msg-bubble bot-msg">${fixedReplies[msg]}</div>`;
-        scrollDown();
-        inputEl.value = '';
-        return;
-      }
-
       // special human-agent flow
       if (msg === "Can I speak to a human agent?") {
         chatBox.innerHTML += `
@@ -105,15 +94,41 @@
 
     function handleHumanConfirmation(response) {
       const chatBox = document.getElementById('chat-box');
+      const token = document.querySelector('meta[name="csrf-token"]').content;
       if (response === 'yes' || response === 'y') {
-        chatBox.innerHTML += `
-          <div class="msg-bubble bot-msg">
-            Thank you. A human agent will contact you shortly. Please check your email.<br>
-            Conversation Ended
-          </div>`;
-        endConversationControls();
-        // then ask for feedback
-        askForFeedback();
+
+        // tell the server to create the ticket
+        fetch('/chatbot/create_ticket', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': token
+          }
+        })
+        .then(res => {
+          if (!res.ok) throw new Error('Network response was not ok');
+          return res.json();
+        })
+        .then(data => {
+          // Show confirmation + ticket info
+          chatBox.innerHTML += `
+            <div class="msg-bubble bot-msg">
+                Thank you. A human agent will contact you shortly. Please check your email.
+                <br><strong>Ticket #${data.ticket_id}</strong> has been created.<br>
+                Conversation Ended
+            </div>`;
+          endConversationControls();
+
+          // then ask for feedback
+          askForFeedback();
+        })
+        .catch(err => {
+          console.error('Ticket creation failed', err);
+          chatBox.innerHTML += `
+            <div class="msg-bubble bot-msg">
+                There was a problem creating your support ticket. Please try again.
+            </div>`;
+        });
       } else if (response === 'no' || response === 'n') {
         chatBox.innerHTML += `
           <div class="msg-bubble bot-msg">
@@ -151,7 +166,12 @@
 
     function sendFAQ(question) {
       awaitingHumanConfirmation = false;
-      document.getElementById('user-input').value = question;
+
+      const chatBox = document.getElementById('chat-box');
+      scrollDown();
+
+      const inputEl = document.getElementById('user-input');
+      inputEl.value = question;
       sendMessage();
     }
 
