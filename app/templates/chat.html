@@ -179,7 +179,7 @@
       const rc = document.getElementById('feedback-container');
       if (choice === 'yes') {
         // redirect to feedback page
-        window.location.href = "{{ url_for('review') }}";
+        window.location.href = "{{ url_for('feedback') }}";
       } else {
         rc.innerHTML = `
           <div class="alert alert-secondary">

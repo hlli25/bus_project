@@ -3,11 +3,11 @@ import sqlalchemy as sa
 import sqlalchemy.orm as so
 from flask_login import UserMixin
 from sqlalchemy import ForeignKey
-from sqlalchemy.testing.schema import mapped_column
 from sqlalchemy.orm import relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db, login
 from dataclasses import dataclass
+import datetime
 
 @dataclass
 class User(UserMixin, db.Model):
@@ -18,9 +18,6 @@ class User(UserMixin, db.Model):
     email: so.Mapped[str] = so.mapped_column(sa.String(120), index=True, unique=True)
     password_hash: so.Mapped[Optional[str]] = so.mapped_column(sa.String(256))
     role: so.Mapped[str] = so.mapped_column(sa.String(10), default="Normal")
-    # when user deleted, reviews remain with null user
-    reviews: so.Mapped[list['Review']] = relationship(back_populates='user', cascade='save-update, merge')
-
 
     def __repr__(self):
         pwh= 'None' if not self.password_hash else f'...{self.password_hash[-5:]}'
@@ -37,14 +34,10 @@ def load_user(id):
     return db.session.get(User, int(id))
 
 
-class Review(db.Model):
-    __tablename__ = 'reviews'
-    id: so.Mapped[int] = so.mapped_column(primary_key=True)
-    feature: so.Mapped[Optional[str]] = so.mapped_column(sa.String(256))
-    text: so.Mapped[Optional[str]] = so.mapped_column(sa.String(1024))
-    stars: so.Mapped[int] = so.mapped_column()
-    user_id: so.Mapped[Optional[int]]  = mapped_column(ForeignKey('users.id', ondelete='SET NULL'))
-    user: so.Mapped[Optional['User']] = relationship(back_populates='reviews')
+class Feedback(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.datetime)
 
-    def __repr__(self):
-        return (f'Review(stars={self.stars}, text="{self.text}", user_id={self.user_id}')
+    user = db.relationship('User', backref=db.backref('feedbacks', lazy=True))
