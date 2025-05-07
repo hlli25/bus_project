@@ -23,12 +23,12 @@ cd bus_project
 
 3. **Install appropriate libraries**
 The main libraries which may need to be installed are:
-python-dotenv ([PyPI](https://pypi.org/project/python-dotenv/) / [Anaconda](https://anaconda.org/conda-forge/python-dotenv))
-google-genai ([PyPI](https://pypi.org/project/google-genai/) / [Anaconda](https://anaconda.org/conda-forge/google-genai))
-flask ([PyPI](https://pypi.org/project/Flask/) / [Anaconda](https://anaconda.org/conda-forge/flask))
-flask-login ([PyPI](https://pypi.org/project/Flask-Login/) / [Anaconda](https://anaconda.org/conda-forge/flask-login))
-flask-sqlalchemy ([PyPI](https://pypi.org/project/Flask-SQLAlchemy/) / [Anaconda](https://anaconda.org/conda-forge/flask-sqlalchemy))
-flask-wtf ([PyPI](https://pypi.org/project/Flask-WTF/) / [Anaconda](https://anaconda.org/conda-forge/flask-wtf))
+* python-dotenv ([PyPI](https://pypi.org/project/python-dotenv/) / [Anaconda](https://anaconda.org/conda-forge/python-dotenv))
+* google-genai ([PyPI](https://pypi.org/project/google-genai/) / [Anaconda](https://anaconda.org/conda-forge/google-genai))
+* flask ([PyPI](https://pypi.org/project/Flask/) / [Anaconda](https://anaconda.org/conda-forge/flask))
+* flask-login ([PyPI](https://pypi.org/project/Flask-Login/) / [Anaconda](https://anaconda.org/conda-forge/flask-login))
+* flask-sqlalchemy ([PyPI](https://pypi.org/project/Flask-SQLAlchemy/) / [Anaconda](https://anaconda.org/conda-forge/flask-sqlalchemy))
+* flask-wtf ([PyPI](https://pypi.org/project/Flask-WTF/) / [Anaconda](https://anaconda.org/conda-forge/flask-wtf))
 
 4. **Set up a run configuration with module: 'flask'.**
 
