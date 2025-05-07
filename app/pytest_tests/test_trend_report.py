@@ -1,16 +1,25 @@
 import pytest
 from flask.signals import template_rendered
+import flask_login.utils
 from app import app as flask_app
 from app.models import Review
 from app.views import chatbot_queries
 
-# Disable authentication requirement for testing
-flask_app.config['LOGIN_DISABLED'] = True
+class DummyAdmin:
+    is_authenticated = True
+    is_active        = True
+    is_anonymous     = False
+    role             = "Admin"
+    username         = "admin_demo"
 
+def fake_get_user():
+    return DummyAdmin()
 
 # Positive test case
 def test_trend_report_view_with_data(monkeypatch):
     with flask_app.app_context():
+        monkeypatch.setattr(flask_login.utils, "_get_user", fake_get_user,)
+
         # Prepare dummy reviews with known stars values (2 and 4)
         class DummyReviewObj:
             def __init__(self, stars):
@@ -58,6 +67,8 @@ def test_trend_report_view_with_data(monkeypatch):
 
 # Negative test case
 def test_trend_report_view_without_data(monkeypatch):
+    monkeypatch.setattr(flask_login.utils, "_get_user", fake_get_user, )
+
     with flask_app.app_context():
         # Define named function for no reviews
         def no_reviews(cls):
